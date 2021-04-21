@@ -3,7 +3,7 @@ export interface Meta {
 }
 
 export interface Rule extends Meta {
- id: string;
+ id: number;
  value?: string;
  tag?: string | null;
 }
@@ -13,10 +13,10 @@ export interface RulesPayload {
 }
 
 export interface PublicMetrics {
- retweet_count: 0;
- reply_count: 0;
- like_count: 0;
- quote_count: 0;
+ retweet_count: number;
+ reply_count: number;
+ like_count: number;
+ quote_count: number;
 }
 
 export interface ReferencedTweet {
@@ -24,22 +24,43 @@ export interface ReferencedTweet {
  id: string;
 }
 
+export interface Mention {
+ start: number;
+ end: number;
+ username: string;
+}
+
+export interface Entities {
+ mentions: Mention[];
+}
+
 export interface Tweet {
  created_at: string;
  conversation_id: string;
- public_metrics: PublicMetrics;
+ public_metrics?: PublicMetrics;
  text: string;
  author_id: string;
- id: string;
+ id?: string;
  referenced_tweets?: ReferencedTweet[];
+ entities?: Entities;
 }
 
 export type TweetTextType = "needed" | "available";
 
-export interface TweetModel extends Tweet {
+export interface ReliefTweet {
  tweet_text_type: TweetTextType;
  tweet_text_keyword: string;
- tweet_keywords: string[];
+ tweet_keywords?: string[];
+ created_at: string;
+ conversation_id: string;
+ conversation_author_id: string;
+ public_metrics?: PublicMetrics;
+ referenced_text: string;
+ replied_author_id: string;
+ id?: string;
+ referenced_tweets?: ReferencedTweet[];
+ entities?: Entities;
+ replied_text: string;
 }
 
 export interface User {

@@ -1,20 +1,26 @@
-import { Rule, RulesPayload } from "./classes";
-import needle from "needle";
-import { HttpRulesService } from "./services/rules";
-import { RULES } from "./constants";
-import { HttpStreamService } from "./services/tweet-stream";
-import { isJson } from "./utils";
+import mongoose = require("mongoose");
+
 const http = require("http");
 const util = require("util");
 const express = require("express");
 
 const config = require("dotenv").config();
-const TOKEN = process.env.TWITTER_BEARER_TOKEN;
-const PORT = process.env.PORT || 3000;
-
 const app = express();
-
 const server = http.createServer(app);
+
+import { HttpRulesService } from "./services/rules";
+import { HttpStreamService } from "./services/tweet-stream";
+import { RULES, PORT, DATABASE_URL, DATABASE_NAME } from "./constants";
+import { RulesPayload, ReliefTweet, TweetData } from "./classes";
+import {
+ getReferencedTweet,
+ getTweetDataToReliefTweet,
+ isBotMentioned,
+ isJson
+} from "./utils";
+import { TWEET_DATA } from "./sample-data";
+
+import TweetModel, { TweetSchema } from "./models/tweet";
 
 const rulesService = new HttpRulesService();
 const streamService = new HttpStreamService();
@@ -22,11 +28,9 @@ const streamService = new HttpStreamService();
 // Get stream rules
 async function getRules() {
  const response = await rulesService.getAll();
-
  return response;
 }
 
-// Set stream rules
 async function setRules() {
  const data = {
   add: RULES
@@ -41,7 +45,6 @@ async function setRules() {
  return response;
 }
 
-// Delete stream rules
 async function deleteRules(rules: RulesPayload) {
  if (!Array.isArray(rules.data)) {
   return null;
@@ -80,9 +83,12 @@ const newDataReceived = (data: any) => {
  try {
   if (isJson(data)) {
    const json = JSON.parse(data);
-   console.log(util.inspect(json, false, null, true /* enable colors */));
+   console.log(util.inspect(json, false, null, true));
+   if (isBotMentioned(json)) {
+    saveTweet(json);
+   }
   } else {
-   console.log(JSON.parse(JSON.stringify(data.toString("utf8"))));
+   console.log(util.inspect(JSON.parse(JSON.stringify(data))));
   }
  } catch (error) {
   console.log("error", error);
@@ -96,7 +102,6 @@ const resetRules = async () => {
 
   await deleteRules(currentRules);
 
-  // Set rules based on array above
   await setRules();
  } catch (error) {
   console.error(error);
@@ -104,16 +109,30 @@ const resetRules = async () => {
  }
 };
 
+const saveTweet = async (tweetData: TweetData) => {
+ const reliefTweet = getTweetDataToReliefTweet(tweetData);
+ if (reliefTweet) {
+  const { _id: id } = await TweetModel.create(reliefTweet as ReliefTweet);
+
+  const tweet = await TweetModel.findById(id).exec();
+  console.log(tweet);
+ }
+};
+
 (async () => {
+ console.log("STARTEDDD");
+
+ await mongoose.connect(DATABASE_URL!, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  dbName: DATABASE_NAME
+ });
+
  await resetRules();
-
  const filteredStream = await streamTweets();
-
  let timeout = 0;
-
  filteredStream.on("timeout", () => {
   console.warn("A connection error occurred. Reconnecting…");
-
   setTimeout(() => {
    timeout++;
    streamTweets();

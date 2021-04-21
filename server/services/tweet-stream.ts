@@ -14,7 +14,7 @@ export class HttpStreamService
   const authHeader = await this.getTokenHeader();
 
   const response = needle.get(
-   `${TWITTER_API_BASE_URL}/tweets/search/stream?tweet.fields=public_metrics,created_at,conversation_id&expansions=author_id,referenced_tweets.id`,
+   `${TWITTER_API_BASE_URL}/tweets/search/stream?tweet.fields=public_metrics,created_at,conversation_id,entities&expansions=author_id,referenced_tweets.id,referenced_tweets.id.author_id`,
    {
     headers: { ...authHeader }
    }
