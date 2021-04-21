@@ -16,10 +16,10 @@ import {
  options: { allowMixed: 0 }
 })
 export class TweetSchema implements ReliefTweet {
- @prop({ required: true })
+ @prop({ type: String, required: true })
  public created_at: string = "";
 
- @prop({ required: true })
+ @prop({ type: String, required: true })
  public conversation_id: string = "";
 
  @prop({ type: mongoose.Schema.Types.Mixed })
