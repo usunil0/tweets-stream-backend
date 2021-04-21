@@ -40,8 +40,6 @@ export const getTweetDataToReliefTweet = (
 
  const replyTweet = tweet.data;
 
- console.log(referencedTweet, replyTweet);
-
  const tweetTypeAndKeyword = getTweetTextTypeAndKeyword(
   sliceMentionText(
    replyTweet.text,
@@ -50,8 +48,6 @@ export const getTweetDataToReliefTweet = (
    )?.end!
   )
  );
-
- console.log(tweetTypeAndKeyword);
 
  if (!tweetTypeAndKeyword.type) return;
 

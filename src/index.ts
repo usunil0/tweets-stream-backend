@@ -70,8 +70,6 @@ async function deleteRules(rules: RulesPayload) {
 async function streamTweets() {
  const stream = await streamService.getNew();
 
- console.log("starting stream");
-
  stream.on("data", (data: any) => {
   newDataReceived(data);
  });
@@ -83,11 +81,14 @@ const newDataReceived = (data: any) => {
  try {
   if (isJson(data)) {
    const json = JSON.parse(data);
-   console.log(util.inspect(json, false, null, true));
+
    if (isBotMentioned(json)) {
     saveTweet(json);
    }
+   //log it
+   console.log(util.inspect(json, false, null, true));
   } else {
+   //buffer logs
    console.log(util.inspect(JSON.parse(JSON.stringify(data))));
   }
  } catch (error) {
@@ -113,15 +114,10 @@ const saveTweet = async (tweetData: TweetData) => {
  const reliefTweet = getTweetDataToReliefTweet(tweetData);
  if (reliefTweet) {
   const { _id: id } = await TweetModel.create(reliefTweet as ReliefTweet);
-
-  const tweet = await TweetModel.findById(id).exec();
-  console.log(tweet);
  }
 };
 
 (async () => {
- console.log("STARTEDDD");
-
  await mongoose.connect(DATABASE_URL!, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
