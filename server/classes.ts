@@ -53,14 +53,14 @@ export interface ReliefTweet {
  tweet_keywords?: string[];
  created_at: string;
  conversation_id: string;
- conversation_author_id: string;
  public_metrics?: PublicMetrics;
  referenced_text: string;
- replied_author_id: string;
  id?: string;
  referenced_tweets?: ReferencedTweet[];
  entities?: Entities;
  replied_text: string;
+ replied_user: User;
+ referenced_user: User;
 }
 
 export interface User {

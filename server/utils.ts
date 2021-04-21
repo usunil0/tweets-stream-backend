@@ -1,4 +1,4 @@
-import { ReliefTweet, TweetData, TweetTextType } from "./classes";
+import { ReliefTweet, TweetData, TweetTextType, User } from "./classes";
 import { BOT_USERNAME } from "./constants";
 
 export const isJson = (str: string) => {
@@ -20,14 +20,28 @@ export const getReferencedTweet = (tweet: TweetData) => {
  return tweet.includes.tweets ? tweet.includes.tweets[0] : undefined;
 };
 
+export const getTweetUsers = (
+ tweet: TweetData
+): { replied_user: User; referenced_user: User } => {
+ const { users } = tweet.includes;
+ const referenced_user = users[1];
+ const replied_user = users[0] || users[1];
+ return {
+  referenced_user,
+  replied_user
+ };
+};
+
 export const getTweetDataToReliefTweet = (
  tweet: TweetData
 ): ReliefTweet | undefined => {
- const referencedTweet = getReferencedTweet(tweet) || tweet.data;
+ const referencedTweet = getReferencedTweet(tweet);
+ const users = getTweetUsers(tweet);
 
  const replyTweet = tweet.data;
 
  console.log(referencedTweet, replyTweet);
+
  const tweetTypeAndKeyword = getTweetTextTypeAndKeyword(
   sliceMentionText(
    replyTweet.text,
@@ -42,15 +56,14 @@ export const getTweetDataToReliefTweet = (
  if (!tweetTypeAndKeyword.type) return;
 
  return {
-  referenced_text: referencedTweet?.text,
+  referenced_text: referencedTweet?.text!,
   replied_text: replyTweet.text,
-  created_at: referencedTweet.created_at,
-  conversation_id: referencedTweet.conversation_id,
-  conversation_author_id: referencedTweet.author_id,
-  replied_author_id: tweet.data.author_id,
+  created_at: referencedTweet?.created_at!,
+  conversation_id: referencedTweet?.conversation_id!,
   tweet_text_type: tweetTypeAndKeyword.type as TweetTextType,
   tweet_text_keyword: tweetTypeAndKeyword.keyword || "",
-  tweet_keywords: []
+  tweet_keywords: [],
+  ...users
  };
 };
 

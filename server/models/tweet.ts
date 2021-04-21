@@ -7,7 +7,8 @@ import {
  ReferencedTweet,
  Tweet,
  ReliefTweet,
- TweetTextType
+ TweetTextType,
+ User
 } from "../classes";
 
 @modelOptions({
@@ -21,14 +22,8 @@ export class TweetSchema implements ReliefTweet {
  @prop({ required: true })
  public conversation_id: string = "";
 
- @prop({ required: true })
- public conversation_author_id: string = "";
-
  @prop({ type: mongoose.Schema.Types.Mixed })
  public public_metrics: PublicMetrics = {} as PublicMetrics;
-
- @prop({ required: true })
- public replied_author_id: string = "";
 
  @prop({ type: Array })
  public referenced_tweets: ReferencedTweet[] = [];
@@ -50,6 +45,12 @@ export class TweetSchema implements ReliefTweet {
 
  @prop({ type: Object })
  public entities: Entities = { mentions: [] };
+
+ @prop({ type: Object, required: true })
+ public replied_user: User = {} as User;
+
+ @prop({ type: Object, required: true })
+ public referenced_user: User = {} as User;
 }
 
 const TweetModel = getModelForClass(TweetSchema);
