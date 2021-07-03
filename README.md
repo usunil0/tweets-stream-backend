@@ -1,0 +1,3 @@
+# tweets-relief-backend
+
+stream tweets, and save it to postgres db.
